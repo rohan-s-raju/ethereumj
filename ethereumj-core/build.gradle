@@ -22,17 +22,14 @@ plugins {
 apply plugin: 'propdeps-maven'
 apply plugin: 'com.jfrog.artifactory-upload'
 
-
-repositories {
-    maven {
-        url "http://dl.bintray.com/ethereum/maven"
-    }
-}
-
 sourceCompatibility = 1.7
 
 mainClassName = 'org.ethereum.Start'
 applicationDefaultJvmArgs = ["-server", "-Xss32m", "-XX:-OmitStackTraceInFastThrow"]
+
+if ( project.hasProperty('jvmArgs') ) {
+    applicationDefaultJvmArgs = applicationDefaultJvmArgs + project.jvmArgs.split('\\s+').toList()
+}
 if (project.hasProperty("mainClass")) {
     mainClassName = mainClass
 }
@@ -117,7 +114,7 @@ dependencies {
     compile "org.iq80.leveldb:leveldb:${leveldbVersion}"
 
     compile "org.fusesource.leveldbjni:leveldbjni:1.8"
-    compile "org.ethereum:leveldbjni-all:1.18"
+    compile "org.ethereum:leveldbjni-all:1.18.2"
 
     compile "com.cedarsoftware:java-util:1.8.0" // for deep equals
     compile "org.javassist:javassist:3.15.0-GA"
@@ -250,7 +247,7 @@ tasks.processResources.doLast(){
     println 'This will be printed after the build task even if something else calls the build task'
 
     File versionfile = file(new File('build/resources/main/build-info.properties'))
-    versionfile.text = 'build.hash=' + gitCommitHash() +  'build.time=' + buildTime()
+    versionfile.text = 'build.hash=' + gitCommitHash() + '\n' + 'build.time=' + buildTime() + '\n' + 'build.branch=' + gitCurBranch() + '\n'
 }
 
 task publish {
@@ -312,12 +309,19 @@ def customizePom(pom, gradleProject) {
 
  def gitCommitHash() {
     def process = "git rev-parse --short HEAD".execute()
-    return process.text
+    return process.text.trim()
  }
 
 def buildTime() {
     def df = new SimpleDateFormat("[dd/MMM/yyyy]-[HH:mm]")
     df.setTimeZone(TimeZone.getTimeZone("GMT"));
     return '[GMT]-' + df.format(new Date())
+}
+
+def gitCurBranch() {
+    def branchName = System.getenv('TRAVIS_BRANCH')
+    if (branchName) return branchName
+    def process = "git rev-parse --abbrev-ref HEAD".execute()
+    return process.text.trim()
 }
 

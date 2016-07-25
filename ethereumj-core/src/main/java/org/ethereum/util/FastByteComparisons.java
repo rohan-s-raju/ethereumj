@@ -17,15 +17,7 @@
  */
 package org.ethereum.util;
 
-import com.google.common.primitives.Longs;
 import com.google.common.primitives.UnsignedBytes;
-
-import java.lang.reflect.Field;
-
-import java.nio.ByteOrder;
-
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 
 /**
@@ -36,6 +28,9 @@ import java.security.PrivilegedAction;
 @SuppressWarnings("restriction")
 public abstract class FastByteComparisons {
 
+    public static boolean equal(byte[] b1, byte[] b2) {
+        return b1.length == b2.length && compareTo(b1, 0, b1.length, b2, 0, b2.length) == 0;
+    }
     /**
      * Lexicographically compare two byte arrays.
      *
@@ -53,8 +48,8 @@ public abstract class FastByteComparisons {
     }
 
     private interface Comparer<T> {
-        abstract public int compareTo(T buffer1, int offset1, int length1,
-                                      T buffer2, int offset2, int length2);
+        int compareTo(T buffer1, int offset1, int length1,
+                      T buffer2, int offset2, int length2);
     }
 
     private static Comparer<byte[]> lexicographicalComparerJavaImpl() {

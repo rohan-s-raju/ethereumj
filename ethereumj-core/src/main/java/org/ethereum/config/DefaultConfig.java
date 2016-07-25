@@ -6,6 +6,7 @@ import org.ethereum.datasource.KeyValueDataSource;
 import org.ethereum.datasource.LevelDbDataSource;
 import org.ethereum.db.BlockStore;
 import org.ethereum.db.IndexedBlockStore;
+import org.ethereum.db.TransactionStore;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.Serializer;
@@ -69,8 +70,12 @@ public class DefaultConfig {
         return indexedBlockStore;
     }
 
-    @Bean @Scope("prototype")
-    LevelDbDataSource levelDbDataSource(String name) {
-        return new LevelDbDataSource(name);
+    @Bean
+    public TransactionStore transactionStore() {
+        KeyValueDataSource ds = commonConfig.keyValueDataSource();
+        ds.setName("transactions");
+        ds.init();
+        CachingDataSource cachingDataSource = new CachingDataSource(ds);
+        return new TransactionStore(cachingDataSource);
     }
 }

@@ -317,7 +317,7 @@ public class CallTransaction {
 
         @Override
         public Object decode(byte[] encoded, int offset) {
-            return Arrays.copyOfRange(encoded, offset, getFixedSize());
+            return Arrays.copyOfRange(encoded, offset, offset + getFixedSize());
         }
     }
 
@@ -562,6 +562,15 @@ public class CallTransaction {
         public Function getByName(String name) {
             for (Function function : functions) {
                 if (name.equals(function.name)) {
+                    return function;
+                }
+            }
+            return null;
+        }
+
+        public Function getConstructor() {
+            for (Function function : functions) {
+                if (function.type == FunctionType.constructor) {
                     return function;
                 }
             }

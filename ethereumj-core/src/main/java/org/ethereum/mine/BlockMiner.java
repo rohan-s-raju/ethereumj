@@ -104,6 +104,10 @@ public class BlockMiner {
         this.cpuThreads = cpuThreads;
     }
 
+    public void setMinGasPrice(BigInteger minGasPrice) {
+        this.minGasPrice = minGasPrice;
+    }
+
     public void startMining() {
         isMining = true;
         fireMinerStarted();
@@ -121,7 +125,6 @@ public class BlockMiner {
     protected List<Transaction> getAllPendingTransactions() {
         PendingStateImpl.TransactionSortedSet ret = new PendingStateImpl.TransactionSortedSet();
         ret.addAll(pendingState.getPendingTransactions());
-        ret.addAll(pendingState.getWireTransactions());
         Iterator<Transaction> it = ret.iterator();
         while(it.hasNext()) {
             Transaction tx = it.next();
@@ -236,8 +239,8 @@ public class BlockMiner {
                 }
             }, MoreExecutors.sameThreadExecutor());
         }
-        fireBlockStarted(miningBlock);
-        logger.debug("New block mining started: {}", miningBlock.getShortHash());
+        fireBlockStarted(newMiningBlock);
+        logger.debug("New block mining started: {}", newMiningBlock.getShortHash());
     }
 
     protected void blockMined(Block newBlock) throws InterruptedException {
@@ -261,6 +264,10 @@ public class BlockMiner {
         logger.debug("Importing newly mined block " + newBlock.getShortHash() + " ...");
         ImportResult importResult = ((EthereumImpl) ethereum).addNewMinedBlock(newBlock);
         logger.debug("Mined block import result is " + importResult + " : " + newBlock.getShortHash());
+    }
+
+    public boolean isMining() {
+        return isMining;
     }
 
     /*****  Listener boilerplate  ******/
